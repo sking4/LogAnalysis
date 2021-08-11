@@ -1,16 +1,36 @@
-# This is a sample Python script.
+import argparse
 
-# Press Shift+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
+from tabulate import tabulate
 
-
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
+from gather_data import gather_data
 
 
-# Press the green button in the gutter to run the script.
+def collect_filename():
+    parser = argparse.ArgumentParser(description='Process file name')
+    parser.add_argument('file_path',
+                        nargs='?',
+                        type=str,
+                        default=r"C:\Users\sking4\PycharmProjects\LogAnalysis\adc.log")
+    p = parser.parse_args()
+    file_path = p.file_path
+    return file_path
+
+
+def main():
+    # Gather file path, either from command line or from user input
+    file_path = collect_filename()
+
+    # Open file and process data
+    line_data = gather_data(file_path)
+
+    headers_list = ["Thread", "Host", "App", "PID", "Thread"]
+    table_list = []
+    for entry in line_data:
+        table_list.append([entry, line_data[entry].time, line_data[entry].host, line_data[entry].app, line_data[entry].pid, line_data[entry].thread])
+
+    print("\n", tabulate(table_list, headers=headers_list, sort="Host"),
+          "\n")  # Print out the pretty table
+
+
 if __name__ == '__main__':
-    print_hi('PyCharm')
-
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+    main()
