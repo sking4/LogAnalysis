@@ -1,7 +1,21 @@
-from message_object import MessageObject
+from message_object import LineObject, HostObject
 
 
-def gather_data(file_path):
+def gather_by_host(lines):
+    host_list = []
+    for i in lines:  # for each message line
+        found_host = False
+        for hostObj in host_list:
+            if lines[i].host == hostObj.getHost():
+                hostObj.appendEntry(lines[i].line, lines[i].pid, lines[i].thread)
+                found_host = True
+                break
+        if not found_host:
+            host_list.append(HostObject(lines[i].host, [(lines[i].line, lines[i].pid, lines[i].thread)]))
+    return host_list
+
+
+def gather_from_file(file_path):
     lines = {}
     # Open file
     with open(str(file_path), encoding='ISO-8859-1') as my_file:
@@ -21,7 +35,7 @@ def gather_data(file_path):
                     pid = (pieces[3][pieces[3].find('['):])[1:-1]
                     thread = pieces[7]
 
-                    lines[line_num] = MessageObject(line_num, time, host, app, pid, thread)
+                    lines[line_num] = LineObject(line_num, time, host, app, pid, thread)
                     continue
             elif message_line[0]:
                 if line[:4] == '<nl>':
