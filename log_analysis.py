@@ -26,16 +26,16 @@ def main():
     headers_list = ["Line", "Time", "Host", "App", "PID", "Thread"]
 
     host_list = []
-    for entry in line_data: # find hosts
-        if not len(host_list) < 2: # assuming only 2 hosts
+    for entry in line_data:  # find hosts
+        if not len(host_list) < 2:  # assuming only 2 hosts
             break
         else:
             if not line_data[entry].host in host_list:
                 host_list.append(line_data[entry].host)
 
     app_list = []
-    for entry in line_data: # find apps
-        if not len(app_list) < 3: # assuming only 3 apps
+    for entry in line_data:  # find apps
+        if not len(app_list) < 3:  # assuming only 3 apps
             break
         else:
             if not line_data[entry].app in app_list:
@@ -53,12 +53,12 @@ def main():
                 continue
             else:
                 table_list.append([line_data[entry].line, line_data[entry].time, line_data[entry].host, line_data[entry].app, line_data[entry].pid, line_data[entry].thread])
-                app, pid, time, body = line_data[entry].app, line_data[entry].pid, line_data[entry].time, line_data[entry].body
+                line, app, pid, time, thread, body = line_data[entry].line, line_data[entry].app, line_data[entry].pid, line_data[entry].time, line_data[entry].thread, line_data[entry].body
 
                 if pids[app] == pid:
                     messages[pid].last = time
                 else:
-                    messages[pid] = PidObject(pid, app, time, time, body)
+                    messages[pid] = PidObject(line, pid, app, time, time, thread, body)
                     pids[app] = pid
 
         print("\n", tabulate(table_list, headers=headers_list),
@@ -66,11 +66,18 @@ def main():
 
         messages_list = []
         for entry in messages:
-            messages_list.append([messages[entry].pid, messages[entry].app, messages[entry].first, messages[entry].last, messages[entry].body])
+            messages_list.append([messages[entry].line,
+                                  messages[entry].pid,
+                                  messages[entry].thread,
+                                  messages[entry].app,
+                                  messages[entry].first,
+                                  messages[entry].last,
+                                  messages[entry].body])
 
-        headers_list2 = ["PID", "App", "First", "Last", "Body"]
-        print("\n", tabulate(messages_list, headers=headers_list2),
-              "\n")  # Print out the pretty table
+        #print("Host: ", host)
+        headers_list2 = ["Line", "PID", "Thread", "App", "First", "Last", "Body"]
+        #print("\n", tabulate(messages_list, headers=headers_list2),
+              #"\n")  # Print out the pretty table
 
 
 if __name__ == '__main__':
