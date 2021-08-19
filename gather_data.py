@@ -1,4 +1,5 @@
-from message_object import LineObject, HostObject
+from message_objects import LineObject, HostObject
+import re
 
 
 def gather_by_host(lines):
@@ -21,8 +22,13 @@ def gather_from_file(file_path):
     with open(str(file_path), encoding='ISO-8859-1') as my_file:
         # For each line in the file
         message_line = [False, 0]
-        for line_num, line in enumerate(my_file):
-            if line_num < 1500000:
+        line_num = 0
+        for line in my_file:
+            line_num += 1
+
+            # Check if the line being read is actually a line entry or part of a previous line due to parsing errors
+            if re.match('^[0-9]{4}-$', line[:5]): # Just checking to see that the first part is the year and a dash, full date took too long
+                message_line[0] = False
                 # If line contains "IncomingApp"
                 if "IncomingApp" in line:
                     # If line contains "Message.py 78 Incoming Message"
@@ -36,15 +42,15 @@ def gather_from_file(file_path):
                         pid = (pieces[3][pieces[3].find('['):])[1:-1]
                         thread = pieces[7]
 
-
-                        lines[str(line_num)] = LineObject(line_num, time, host, app, pid, thread)
+                        lines[line_num] = LineObject(line_num, time, host, app, pid, thread)
                         continue
-                elif message_line[0]:
-                    if line[:4] == '<nl>':
-                        lines[message_line[1]].body = lines[message_line[1]].body + line
-                    else:
-                        message_line[0] = False
-                    continue
+            else:
+                if message_line[0]:
+                    lines[message_line[1]].body = lines[message_line[1]].body + line
+                    line_num -= 1
+                else:
+                    line_num -= 1
+                continue
     return lines
 
 

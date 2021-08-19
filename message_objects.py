@@ -1,11 +1,3 @@
-# class LineObject(object):
-#     def __init__(self, line=None):
-#         self.__line = int(line)
-#
-#     def getLine(self):
-#         return self.__line
-
-
 class LineObject(object):
     def __init__(self, line=0, time=None, host=None, app=None, pid=None, thread=None, body=""):
         self.line = int(line)
@@ -32,8 +24,9 @@ class HostObject(object):
 
 
 class PidObject(object):
-    def __init__(self, line=None, pid=None, app=None, first=None, last=None, thread=None, body=None):
+    def __init__(self, line=None, host=None, pid=None, app=None, first=None, last=None, thread=None, body=None):
         self.line = line
+        self.host = host
         self.pid = pid
         self.app = app
         self.first = first
