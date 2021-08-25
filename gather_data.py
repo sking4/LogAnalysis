@@ -1,5 +1,6 @@
 from message_objects import LineObject, HostObject
 import re
+from datetime import datetime
 
 
 def gather_by_host(lines):
@@ -36,10 +37,10 @@ def gather_from_file(file_path):
                         message_line = [True, line_num]
                         # Create an object with the line number as the identifier and add fields as attributes
                         pieces = line.split()
-                        time = pieces[0]
+                        time = datetime.strptime(pieces[0], "%Y-%m-%dT%H:%M:%S")
                         host = pieces[2]
                         app = pieces[3][:pieces[3].find('[')]
-                        pid = (pieces[3][pieces[3].find('['):])[1:-1]
+                        pid = int((pieces[3][pieces[3].find('['):])[1:-1])
                         thread = pieces[7]
 
                         lines[line_num] = LineObject(line_num, time, host, app, pid, thread)

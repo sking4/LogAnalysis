@@ -33,4 +33,3 @@ class PidObject(object):
         self.last = last
         self.thread = thread
         self.body = body
-

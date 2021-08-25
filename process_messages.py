@@ -1,9 +1,12 @@
 import time
+import datetime
 from message_objects import PidObject
 from outputs import tabulate_all_message_lines, tabulate_pid_change_message_lines, print_to_file
 
 
 def process_messages(line_data):
+    all_message_lines = []
+    pid_change_message_lines = []
     host_list = []
     for entry in line_data:  # find hosts
         if not len(host_list) < 2:  # assuming only 2 hosts
@@ -21,9 +24,7 @@ def process_messages(line_data):
                 app_list.append(line_data[entry].app)
 
     # Separate the messages by host
-    pid_change_message_lines = []
     for host in host_list:
-        all_message_lines = []
         pids = {}
         for app in app_list:
             pids[app] = None
@@ -34,11 +35,12 @@ def process_messages(line_data):
                 continue
             else:
                 all_message_lines.append([line_data[entry].line,
-                                   line_data[entry].time,
-                                   line_data[entry].host,
-                                   line_data[entry].app,
-                                   line_data[entry].pid,
-                                   line_data[entry].thread])
+                                          line_data[entry].time,
+                                          line_data[entry].host,
+                                          line_data[entry].app,
+                                          line_data[entry].pid,
+                                          line_data[entry].thread,
+                                          line_data[entry].body])
 
                 if pids[line_data[entry].app] == line_data[entry].pid:  # if the PID for that app has NOT changed
                     messages[line_data[entry].pid].last = line_data[
@@ -54,20 +56,63 @@ def process_messages(line_data):
                                                                line_data[entry].body)
                     pids[line_data[entry].app] = line_data[entry].pid
 
-        print("\n", tabulate_all_message_lines(all_message_lines), "\n")
-
+        first = None
+        last = None
+        pid = None
+        group = []
         for entry in messages:
-            pid_change_message_lines.append([messages[entry].line,
-                                             messages[entry].host,
-                                             messages[entry].pid,
-                                             messages[entry].thread,
-                                             messages[entry].app,
-                                             messages[entry].first,
-                                             messages[entry].last,
-                                             messages[entry].body])
+            if pid is None:
+                pid = messages[entry].pid
+            if first is None:
+                first = messages[entry].first
+            if last is None:
+                last = messages[entry].last
 
-        message_lines_table = tabulate_pid_change_message_lines(pid_change_message_lines, host)
-        print("Host: ", host, message_lines_table, "\n")
+            if (messages[entry].pid - 3) <= pid <= (messages[entry].pid + 3):  # Talking about the same group
+                # Could also judge by start time but the ranges on that were less reliable
+                group.append(messages[entry])
+            else:  # Not talking about the same group
+                group.clear()
+                pid = messages[entry].pid
+                first = messages[entry].first
+                last = messages[entry].last
 
-        file_name = "Log_Messages_" + time.strftime("%Y%m%d-%H%M%S") + ".txt"
-        print_to_file(message_lines_table, file_name)
+            if len(group) == 3:
+                minimum = min(item.last for item in group)
+                last_range = max(item.last for item in group) - minimum
+                if last_range > datetime.timedelta(minutes=1):  # If the lines don't all die within the same minute
+                    for item in group:
+                        if item.last == minimum:  # If that one is the first to die
+                            # then keep it
+                            pid_change_message_lines.append([item.line,
+                                                             item.host,
+                                                             item.pid,
+                                                             item.app,
+                                                             item.first,
+                                                             item.last,
+                                                             item.thread,
+                                                             item.body])
+                first, last, pid = None, None, None
+                group.clear()
+
+
+
+
+
+
+
+
+
+
+        # message_lines_table = tabulate_pid_change_message_lines(pid_change_message_lines, host)
+        # print("Host: ", host)
+        # print(message_lines_table, "\n")
+
+    # print("\n", tabulate_all_message_lines(all_message_lines), "\n")
+
+    file_name = "Log_Entries_by_Host_" + time.strftime("%Y%m%d-%H%M%S") + ".txt"
+    test = tabulate_all_message_lines(all_message_lines)
+    print_to_file(test, file_name)
+
+    file_name = "Failing_Messages_" + time.strftime("%Y%m%d-%H%M%S") + ".txt"
+    print_to_file(tabulate_pid_change_message_lines(pid_change_message_lines), file_name)
