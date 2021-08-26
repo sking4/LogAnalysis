@@ -39,8 +39,7 @@ def process_messages(line_data):
                                           line_data[entry].host,
                                           line_data[entry].app,
                                           line_data[entry].pid,
-                                          line_data[entry].thread,
-                                          line_data[entry].body])
+                                          line_data[entry].thread])
 
                 if pids[line_data[entry].app] == line_data[entry].pid:  # if the PID for that app has NOT changed
                     messages[line_data[entry].pid].last = line_data[
@@ -95,24 +94,16 @@ def process_messages(line_data):
                 first, last, pid = None, None, None
                 group.clear()
 
-
-
-
-
-
-
-
-
-
-        # message_lines_table = tabulate_pid_change_message_lines(pid_change_message_lines, host)
-        # print("Host: ", host)
-        # print(message_lines_table, "\n")
-
-    # print("\n", tabulate_all_message_lines(all_message_lines), "\n")
-
     file_name = "Log_Entries_by_Host_" + time.strftime("%Y%m%d-%H%M%S") + ".txt"
     test = tabulate_all_message_lines(all_message_lines)
     print_to_file(test, file_name)
 
     file_name = "Failing_Messages_" + time.strftime("%Y%m%d-%H%M%S") + ".txt"
     print_to_file(tabulate_pid_change_message_lines(pid_change_message_lines), file_name)
+
+
+def debug(pid_change_message_lines, all_message_lines, host):
+    message_lines_table = tabulate_pid_change_message_lines(pid_change_message_lines)
+    print("Host: ", host)
+    print(message_lines_table, "\n")
+    print("\n", tabulate_all_message_lines(all_message_lines), "\n")
