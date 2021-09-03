@@ -42,8 +42,10 @@ def process_messages(line_data):
                                           line_data[entry].thread])
 
                 if pids[line_data[entry].app] == line_data[entry].pid:  # if the PID for that app has NOT changed
-                    messages[line_data[entry].pid].last = line_data[
-                        entry].time  # time of last occurrence updated to current entry
+                    # Update "last occurrence" info to current entry
+                    messages[line_data[entry].pid].last = line_data[entry].time
+                    messages[line_data[entry].pid].hang_line = line_data[entry].line
+                    messages[line_data[entry].pid].hang_body = line_data[entry].body
                 else:  # if the PID for that app HAS changed
                     messages[line_data[entry].pid] = PidObject(line_data[entry].line,
                                                                line_data[entry].host,
@@ -83,14 +85,14 @@ def process_messages(line_data):
                     for item in group:
                         if item.last == minimum:  # If that one is the first to die
                             # then keep it
-                            pid_change_message_lines.append([item.line,
+                            pid_change_message_lines.append([item.hang_line,
                                                              item.host,
                                                              item.pid,
                                                              item.app,
                                                              item.first,
                                                              item.last,
                                                              item.thread,
-                                                             item.body])
+                                                             item.hang_body])
                 first, last, pid = None, None, None
                 group.clear()
 

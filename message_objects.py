@@ -24,12 +24,12 @@ class HostObject(object):
 
 
 class PidObject(object):
-    def __init__(self, line=None, host=None, pid=None, app=None, first=None, last=None, thread=None, body=None):
-        self.line = line
+    def __init__(self, hang_line=None, host=None, pid=None, app=None, first=None, last=None, thread=None, hang_body=None):
+        self.hang_line = hang_line
         self.host = host
         self.pid = pid
         self.app = app
         self.first = first
         self.last = last
         self.thread = thread
-        self.body = body
+        self.hang_body = hang_body
