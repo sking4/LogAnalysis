@@ -1,6 +1,8 @@
 from message_objects import LineObject, HostObject
 import re
 from datetime import datetime
+from io import open
+from collections import OrderedDict
 
 
 def gather_by_host(lines):
@@ -18,9 +20,9 @@ def gather_by_host(lines):
 
 
 def gather_from_file(file_path):
-    lines = {}
+    lines = OrderedDict()
     # Open file
-    with open(str(file_path), encoding='ISO-8859-1') as my_file:
+    with open(str(file_path), 'r', encoding='ISO-8859-1') as my_file:
         # For each line in the file
         message_line = [False, 0]
         line_num = 0

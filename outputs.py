@@ -1,4 +1,5 @@
 from tabulate import tabulate
+from io import open
 
 
 def tabulate_all_message_lines(all_message_lines):
@@ -12,5 +13,5 @@ def tabulate_pid_change_message_lines(pid_change_message_lines):
 
 
 def print_to_file(file_content, file_name):
-    with open(file_name, 'w', encoding="utf-8") as f:
-        print(file_content, file_name, file=f)
+    with open(file_name, 'w', encoding='utf-8') as f:
+        f.write(file_content)

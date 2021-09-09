@@ -2,6 +2,7 @@ import time
 import datetime
 from message_objects import PidObject
 from outputs import tabulate_all_message_lines, tabulate_pid_change_message_lines, print_to_file
+from collections import OrderedDict
 
 
 def process_messages(line_data):
@@ -29,7 +30,7 @@ def process_messages(line_data):
         for app in app_list:
             pids[app] = None
 
-        messages = {}
+        messages = OrderedDict()
         for entry in line_data:
             if line_data[entry].host != host:
                 continue
@@ -73,7 +74,7 @@ def process_messages(line_data):
                 # Could also judge by start time but the ranges on that were less reliable
                 group.append(messages[entry])
             else:  # Not talking about the same group
-                group.clear()
+                group = []
                 pid = messages[entry].pid
                 first = messages[entry].first
                 last = messages[entry].last
@@ -94,7 +95,7 @@ def process_messages(line_data):
                                                              item.thread,
                                                              item.hang_body])
                 first, last, pid = None, None, None
-                group.clear()
+                group = []
 
     file_name = "Log_Entries_by_Host_" + time.strftime("%Y%m%d-%H%M%S") + ".txt"
     test = tabulate_all_message_lines(all_message_lines)
