@@ -1,3 +1,7 @@
+# This is the main file for analyzing error logs. It finds hanging threads
+# and outputs two files: one of all of the error lines, and one of the specific
+# threads that cause the hangs and the full body of those error messages.
+
 import argparse
 from gather_data import gather_from_file, gather_by_host
 from process_messages import process_messages
