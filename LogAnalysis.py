@@ -25,7 +25,7 @@ def main():
     # Open file and process data
     line_data = gather_from_file(file_path)
 
-    process_messages(line_data)
+    process_messages(line_data, file_path)
 
 
 if __name__ == '__main__':

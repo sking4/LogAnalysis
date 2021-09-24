@@ -1,11 +1,22 @@
+import os
 import time
 import datetime
 from message_objects import PidObject
-from outputs import tabulate_all_message_lines, tabulate_pid_change_message_lines, print_to_file
+from outputs import tabulate_all_message_lines, tabulate_pid_change_message_lines, print_to_file, \
+    output_individual_failed_messages, output_compiled_message_data
 from collections import OrderedDict
 
 
-def process_messages(line_data):
+def process_messages(line_data, file_path):
+    now = time.strftime("%Y%m%d-%H%M%S")
+
+    # Create new folder for failing messages as individual files
+    folder_path = os.path.dirname(os.path.abspath(file_path))
+    new_path = os.path.normpath(folder_path + "/Failing Messages " + now)
+    if not os.path.exists(new_path):
+        os.makedirs(new_path)
+    os.chdir(new_path)
+
     all_message_lines = []
     pid_change_message_lines = []
     host_list = []
@@ -94,15 +105,12 @@ def process_messages(line_data):
                                                              item.last,
                                                              item.thread,
                                                              item.hang_body])
+
+                            output_individual_failed_messages(item, now)
                 first, last, pid = None, None, None
                 group = []
 
-    file_name = "Log_Entries_by_Host_" + time.strftime("%Y%m%d-%H%M%S") + ".txt"
-    test = tabulate_all_message_lines(all_message_lines)
-    print_to_file(test, file_name)
-
-    file_name = "Failing_Messages_" + time.strftime("%Y%m%d-%H%M%S") + ".txt"
-    print_to_file(tabulate_pid_change_message_lines(pid_change_message_lines), file_name)
+    output_compiled_message_data(all_message_lines, pid_change_message_lines, folder_path, now)
 
 
 def debug(pid_change_message_lines, all_message_lines, host):
